@@ -1,4 +1,4 @@
-import { WeiboClientOptions } from "./weiboClientTypes";
+import { WeiboClientOptions, WeiboUser } from "./weiboClientTypes";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 export abstract class WeiboClientBase {
@@ -67,5 +67,58 @@ export abstract class WeiboClientBase {
 
     protected getHeaders(): Record<string, string> {
         return this.getJsonHeaders();
+    }
+
+    protected async getCurrentUser(): Promise<WeiboUser | {success: false; error: string}> {
+        const url = 'https://weibo.com/ajax/feed/allGroups';
+        let errorMessage = ''
+        try {
+            const response = await this.fetchWithTimeout(url, {
+            method: 'GET',
+            headers: this.getHeaders(),
+            });
+            if (!response.data.ok)
+            {
+                errorMessage = `Failed to get current user: ${response.data.msg || 'Unknown error'}`;
+                return { success: false, error: errorMessage };
+            }
+            const groupData = response.data.groups;
+            if (!groupData || groupData.length === 0) {
+                errorMessage = 'Failed to get current user: No group data available';
+                return { success: false, error: errorMessage };
+            }
+            const group = groupData[0].group;
+            if (!group ||group.length === 0) {
+                errorMessage = 'Failed to get current user id: No user data available in group';
+                return { success: false, error: errorMessage };
+            }
+            const userID = group[0].uid;
+            try {
+                const response =  await this.fetchWithTimeout(`https://weibo.com/ajax/profile/info?uid=${userID}`, {
+                method: 'GET',
+                headers: this.getHeaders(),
+                });
+                if (!response.data.ok) {
+                    errorMessage = `Failed to get current user info: ${response.data.msg || 'Unknown error'}`;
+                    return { success: false, error: errorMessage };
+                }
+                const currentUser = response.data.data.user as WeiboUser;
+                return currentUser;
+            } catch (error) {
+                if (error instanceof Error) {
+                    errorMessage = `Failed to get current user info: ${error.message}`;
+                } else {
+                    errorMessage = 'Failed to get current user info: Unknown error';
+                }
+                return { success: false, error: errorMessage };
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                errorMessage = `Failed to get current user: ${error.message}`;
+            } else {
+                errorMessage = 'Failed to get current user: Unknown error';
+            }
+            return { success: false, error: errorMessage };
+        }
     }
 }
