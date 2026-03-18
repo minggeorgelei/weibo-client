@@ -1,9 +1,15 @@
-import { WeiboClientOptions, WeiboUser } from "./weiboClientTypes";
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import {
+  WeiboClientOptions,
+  WeiboUser,
+  GetCurrentUserResult,
+} from "./weiboClientTypes";
+import { AxiosInstance } from "axios";
+import { createWeiboAxiosInstance, WeiboApiResult } from "./axiosInstance";
 
 export abstract class WeiboClientBase {
-  protected clientUserId?: string;
+  protected clientUserId?: number;
   protected timeoutMs?: number;
+  protected api: AxiosInstance;
   // cookie values
   protected SUB: string;
   protected SUBP: string;
@@ -38,20 +44,10 @@ export abstract class WeiboClientBase {
       options.userAgent ||
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36";
     this.cookieHeader = `SUB=${this.SUB}; SUBP=${this.SUBP}; WBPSESS=${this.WBPSESS}; ALF=${this.ALF}; SCF=${this.SCF}; XSRF-TOKEN=${this.XSRFTOKEN}`;
-  }
 
-  protected async sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  protected async fetchWithTimeout(
-    url: string,
-    config: AxiosRequestConfig = {},
-  ): Promise<AxiosResponse> {
-    return axios({
-      ...config,
-      url,
-      timeout: this.timeoutMs,
+    this.api = createWeiboAxiosInstance({
+      timeoutMs: this.timeoutMs,
+      getHeaders: () => this.getBaseHeaders(),
     });
   }
 
@@ -72,72 +68,44 @@ export abstract class WeiboClientBase {
     return headers;
   }
 
-  protected getJsonHeaders(): Record<string, string> {
-    return {
-      ...this.getBaseHeaders(),
-      "Content-Type": "application/json",
-    };
-  }
-
-  protected getHeaders(): Record<string, string> {
-    return this.getJsonHeaders();
-  }
-
-  protected async getCurrentUser(): Promise<
-    WeiboUser | { success: false; error: string }
-  > {
-    const url = "https://weibo.com/ajax/feed/allGroups";
-    let errorMessage = "";
-    try {
-      const response = await this.fetchWithTimeout(url, {
-        method: "GET",
-        headers: this.getHeaders(),
-      });
-      if (!response.data.ok) {
-        errorMessage = `Failed to get current user: ${response.data.msg || "Unknown error"}`;
-        return { success: false, error: errorMessage };
-      }
-      const groupData = response.data.groups;
-      if (!groupData || groupData.length === 0) {
-        errorMessage = "Failed to get current user: No group data available";
-        return { success: false, error: errorMessage };
-      }
-      const group = groupData[0].group;
-      if (!group || group.length === 0) {
-        errorMessage =
-          "Failed to get current user id: No user data available in group";
-        return { success: false, error: errorMessage };
-      }
-      const userID = group[0].uid;
-      try {
-        const response = await this.fetchWithTimeout(
-          `https://weibo.com/ajax/profile/info?uid=${userID}`,
-          {
-            method: "GET",
-            headers: this.getHeaders(),
-          },
-        );
-        if (!response.data.ok) {
-          errorMessage = `Failed to get current user info: ${response.data.msg || "Unknown error"}`;
-          return { success: false, error: errorMessage };
-        }
-        const currentUser = response.data.data.user as WeiboUser;
-        return currentUser;
-      } catch (error) {
-        if (error instanceof Error) {
-          errorMessage = `Failed to get current user info: ${error.message}`;
-        } else {
-          errorMessage = "Failed to get current user info: Unknown error";
-        }
-        return { success: false, error: errorMessage };
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        errorMessage = `Failed to get current user: ${error.message}`;
-      } else {
-        errorMessage = "Failed to get current user: Unknown error";
-      }
-      return { success: false, error: errorMessage };
+  protected async getCurrentUser(): Promise<GetCurrentUserResult> {
+    const response = await this.api.get("/feed/allGroups");
+    const result = response.data as WeiboApiResult;
+    if (!result.success) {
+      return {
+        success: false,
+        error: `Failed to get current user: ${result.error}`,
+      };
     }
+
+    const groupData = result.data.groups;
+    const group = groupData[0].group;
+    const userID = group[0].uid;
+    const profileResponse = await this.api.get("/profile/info", {
+      params: { uid: userID },
+    });
+    const profileResult = profileResponse.data as WeiboApiResult;
+    if (!profileResult.success) {
+      return {
+        success: false,
+        error: `Failed to get current user info: ${profileResult.error}`,
+      };
+    }
+    const rawUserData = profileResult.data.user;
+    const currentUser: WeiboUser = {
+      id: rawUserData.id,
+      screenName: rawUserData.screen_name,
+      profileImageUrl: rawUserData.profile_image_url,
+      commentCount: parseInt(rawUserData.status_total_counter.comment_cnt),
+      repostCount: parseInt(rawUserData.status_total_counter.repost_cnt),
+      likeCount: parseInt(rawUserData.status_total_counter.like_cnt),
+      description: rawUserData.description,
+      location: rawUserData.location,
+      gender: rawUserData.gender,
+      followersCount: rawUserData.followers_count,
+      friendsCount: rawUserData.friends_count,
+    };
+    this.clientUserId = currentUser.id;
+    return { success: true, user: currentUser };
   }
 }
