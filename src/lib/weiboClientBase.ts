@@ -1,8 +1,5 @@
-import {
-  WeiboClientOptions,
-  WeiboUser,
-  GetCurrentUserResult,
-} from "./weiboClientTypes";
+import { WeiboClientOptions, GetCurrentUserResult } from "./weiboClientTypes";
+import { parseWeiboUser } from "./parsers";
 import { AxiosInstance } from "axios";
 import { createWeiboAxiosInstance, WeiboApiResult } from "./axiosInstance";
 
@@ -92,19 +89,7 @@ export abstract class WeiboClientBase {
       };
     }
     const rawUserData = profileResult.data.user;
-    const currentUser: WeiboUser = {
-      id: rawUserData.id,
-      screenName: rawUserData.screen_name,
-      profileImageUrl: rawUserData.profile_image_url,
-      commentCount: parseInt(rawUserData.status_total_counter.comment_cnt),
-      repostCount: parseInt(rawUserData.status_total_counter.repost_cnt),
-      likeCount: parseInt(rawUserData.status_total_counter.like_cnt),
-      description: rawUserData.description,
-      location: rawUserData.location,
-      gender: rawUserData.gender,
-      followersCount: rawUserData.followers_count,
-      friendsCount: rawUserData.friends_count,
-    };
+    const currentUser = parseWeiboUser(rawUserData);
     this.clientUserId = currentUser.id;
     return { success: true, user: currentUser };
   }

@@ -1,9 +1,16 @@
 import { WeiboClientBase } from "./weiboClientBase";
-import { WeiboClientOptions, FollowingResult } from "./weiboClientTypes";
+import {
+  WeiboClientOptions,
+  FollowingResult,
+  FollowerResult,
+  WeiboUser,
+} from "./weiboClientTypes";
+import { WeiboApiResult } from "./axiosInstance";
+import { parseWeiboUser } from "./parsers";
 
 export interface IWeiboClientUsers {
-  getFollowers(userId: number, count?: number): Promise<FollowingResult>;
-  getFollowing(userId: number, count?: number): Promise<FollowingResult>;
+  getFollowers(userId: number, pageNumber?: number): Promise<FollowerResult>;
+  getFollowing(userId: number, pageNumber?: number): Promise<FollowingResult>;
 }
 
 export class WeiboClientUsers
@@ -14,11 +21,58 @@ export class WeiboClientUsers
     super(options);
   }
 
-  getFollowers(userId: number, count?: number): Promise<FollowingResult> {
-    throw new Error("Method not implemented.");
+  async getFollowers(
+    userId: number,
+    pageNumber?: number,
+  ): Promise<FollowerResult> {
+    const response = await this.api.get("/friendships/friends", {
+      params: {
+        uid: userId,
+        page: pageNumber ?? 1,
+        related: "fans",
+      },
+    });
+    const data = response.data as WeiboApiResult;
+    if (!data.success) {
+      return {
+        success: false,
+        error: `Failed to fetch followers list for user ${userId}: ${data.error}`,
+      };
+    }
+    const rawFollowersData = data.data.users;
+    const allUsers: WeiboUser[] = rawFollowersData.map(parseWeiboUser);
+    return {
+      success: true,
+      users: allUsers,
+      totalCount: data.data.totalCount,
+      nextCursor: data.data.nextCursor,
+    };
   }
 
-  getFollowing(userId: number, count?: number): Promise<FollowingResult> {
-    throw new Error("Method not implemented.");
+  async getFollowing(
+    userId: number,
+    pageNumber?: number,
+  ): Promise<FollowingResult> {
+    const response = await this.api.get("/friendships/friends", {
+      params: {
+        uid: userId,
+        page: pageNumber ?? 1,
+      },
+    });
+    const data = response.data as WeiboApiResult;
+    if (!data.success) {
+      return {
+        success: false,
+        error: `Failed to fetch following list for user ${userId}: ${data.error}`,
+      };
+    }
+    const rawFollowingData = data.data.users;
+    const allUsers: WeiboUser[] = rawFollowingData.map(parseWeiboUser);
+    return {
+      success: true,
+      users: allUsers,
+      totalCount: data.data.total_number,
+      nextCursor: data.data.next_cursor,
+    };
   }
 }

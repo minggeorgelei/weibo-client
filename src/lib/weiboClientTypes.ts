@@ -21,9 +21,12 @@ export interface WeiboUser {
 export interface FollowingResult {
   success: boolean;
   users?: WeiboUser[];
-  total_number?: number;
+  totalCount?: number;
+  nextCursor?: number;
   error?: string;
 }
+
+export type FollowerResult = FollowingResult;
 
 export interface GetCurrentUserResult {
   success: boolean;
