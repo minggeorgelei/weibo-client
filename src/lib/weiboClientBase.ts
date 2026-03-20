@@ -93,4 +93,20 @@ export abstract class WeiboClientBase {
     this.clientUserId = currentUser.id;
     return { success: true, user: currentUser };
   }
+
+  protected async getUserByScreenName(screenName: string) {
+    const response = await this.api.get("/profile/info", {
+      params: { screen_name: screenName },
+    });
+    const result = response.data as WeiboApiResult;
+    if (!result.success) {
+      return {
+        success: false,
+        error: `Failed to get user by screen name ${screenName}: ${result.error}`,
+      };
+    }
+    const rawUserData = result.data.user;
+    const user = parseWeiboUser(rawUserData);
+    return { success: true, user };
+  }
 }

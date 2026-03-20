@@ -1,5 +1,9 @@
 import type { Command } from "commander";
-import { WeiboUser } from "../lib/weiboClientTypes";
+import {
+  FollowingResult,
+  FollowerResult,
+  WeiboUser,
+} from "../lib/weiboClientTypes";
 import { CliContext } from "../cli/shared";
 import { WeiboClientUsers } from "../lib/weiboClientUsers";
 
@@ -8,25 +12,16 @@ type UserListCommandSpec = {
   description: string;
   fetch: (
     client: WeiboClientUsers,
-    userId: string,
-    count: number,
-    cursor: string | undefined,
-  ) => Promise<PagedUsersResult>;
-};
-
-type PagedUsersResult = {
-  success: boolean;
-  users?: WeiboUser[];
-  nextCursor?: string;
-  error?: string;
+    screenName: string,
+    pageNumber?: number,
+  ) => Promise<FollowingResult | FollowerResult>;
 };
 
 type UserListCommandOpts = {
-  user?: string;
-  count?: string;
-  cursor?: string;
+  screenName?: string;
+  startPage?: number;
   all?: boolean;
-  maxPages?: string;
+  maxPages?: number;
   json?: boolean;
 };
 
@@ -46,7 +41,6 @@ export function registerUserCommands(program: Command, ctx: CliContext): void {
         "--screen-name <screenName>",
         `Screen name to get ${spec.name} for (defaults to current user)`,
       )
-      .option("-n, --count <number>", "Number of users to fetch", "50")
       .option("--all", "Fetch all users (paginate automatically)")
       .option("--json", "Output as JSON")
       .action(async (cmdOpts: UserListCommandOpts) =>
