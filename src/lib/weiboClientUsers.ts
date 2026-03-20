@@ -45,7 +45,7 @@ export class WeiboClientUsers
       success: true,
       users: allUsers,
       totalCount: data.data.totalCount,
-      nextCursor: data.data.nextCursor,
+      nextPage: data.data.nextCursor / 20 + 1,
     };
   }
 
@@ -72,7 +72,7 @@ export class WeiboClientUsers
       success: true,
       users: allUsers,
       totalCount: data.data.total_number,
-      nextCursor: data.data.next_cursor,
+      nextPage: data.data.next_cursor / 20 + 1,
     };
   }
 }

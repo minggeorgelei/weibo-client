@@ -65,7 +65,7 @@ export abstract class WeiboClientBase {
     return headers;
   }
 
-  protected async getCurrentUser(): Promise<GetCurrentUserResult> {
+  public async getCurrentUser(): Promise<GetCurrentUserResult> {
     const response = await this.api.get("/feed/allGroups");
     const result = response.data as WeiboApiResult;
     if (!result.success) {
@@ -94,7 +94,7 @@ export abstract class WeiboClientBase {
     return { success: true, user: currentUser };
   }
 
-  protected async getUserByScreenName(screenName: string) {
+  public async getUserByScreenName(screenName: string) {
     const response = await this.api.get("/profile/info", {
       params: { screen_name: screenName },
     });

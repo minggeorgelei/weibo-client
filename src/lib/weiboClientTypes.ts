@@ -22,7 +22,7 @@ export interface FollowingResult {
   success: boolean;
   users?: WeiboUser[];
   totalCount?: number;
-  nextCursor?: number;
+  nextPage?: number;
   error?: string;
 }
 
