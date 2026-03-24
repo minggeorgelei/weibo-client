@@ -31,7 +31,7 @@ const WEIBO_COOKIE_NAMES = [
   "WBPSESS",
   "ALF",
   "SCF",
-  "XSRFTOKEN",
+  "XSRF-TOKEN",
 ];
 const WEIBO_URL = "https://weibo.com/";
 const WEIBO_ORIGINS = ["https://weibo.com"];
@@ -225,7 +225,7 @@ async function readWeiboCookiesFromBrowser(options: {
   const WBPSESS = pickCookieValue(resultCookies, "WBPSESS");
   const ALF = pickCookieValue(resultCookies, "ALF");
   const SCF = pickCookieValue(resultCookies, "SCF");
-  const XSRFTOKEN = pickCookieValue(resultCookies, "XSRFTOKEN");
+  const XSRFTOKEN = pickCookieValue(resultCookies, "XSRF-TOKEN");
 
   if (SUB) {
     cookieExtractionResult.cookies.SUB = SUB;

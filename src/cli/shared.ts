@@ -68,6 +68,14 @@ type CredentialsOptions = {
   cookieSource?: CookieSource;
 };
 
+export const collectCookieSource = (
+  value: string,
+  sources: CookieSource[] = [],
+): CookieSource[] => {
+  sources.push(parseCookieSource(value));
+  return sources;
+};
+
 function parseCookieSource(value: string): CookieSource {
   const normalized = value.trim().toLowerCase();
   if (

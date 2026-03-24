@@ -5,15 +5,18 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "tsc --watch"
+    "build": "pnpm run build:dist && pnpm run build:binary",
+    "build:dist": "tsc",
+    "build:binary": "WEIBOCLIENT_VERSION=$(node -p \"require('./package.json').version\") WEIBOCLIENT_GIT_SHA=$(git rev-parse --short=8 HEAD 2>/dev/null || true) bun build --compile --minify --env=WEIBOCLIENT_* src/cli.ts --outfile weibo",
+    "dev": "tsx src/cli.ts",
+    "weibo": "pnpm run build:dist && node dist/cli.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^25.3.3",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {

@@ -29,7 +29,7 @@ export class WeiboClientUsers
       params: {
         uid: userId,
         page: pageNumber ?? 1,
-        related: "fans",
+        relate: "fans",
       },
     });
     const data = response.data as WeiboApiResult;
@@ -44,8 +44,8 @@ export class WeiboClientUsers
     return {
       success: true,
       users: allUsers,
-      totalCount: data.data.totalCount,
-      nextPage: data.data.nextCursor / 20 + 1,
+      totalCount: data.data.total_number,
+      nextPage: data.data.next_cursor / 20 + 1,
     };
   }
 

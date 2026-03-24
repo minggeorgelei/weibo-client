@@ -88,7 +88,7 @@ export abstract class WeiboClientBase {
         error: `Failed to get current user info: ${profileResult.error}`,
       };
     }
-    const rawUserData = profileResult.data.user;
+    const rawUserData = profileResult.data.data.user;
     const currentUser = parseWeiboUser(rawUserData);
     this.clientUserId = currentUser.id;
     return { success: true, user: currentUser };
@@ -105,7 +105,7 @@ export abstract class WeiboClientBase {
         error: `Failed to get user by screen name ${screenName}: ${result.error}`,
       };
     }
-    const rawUserData = result.data.user;
+    const rawUserData = result.data.data.user;
     const user = parseWeiboUser(rawUserData);
     return { success: true, user };
   }
