@@ -15,7 +15,12 @@ export type LabelKind =
   | "credentials"
   | "user"
   | "userId"
-  | "email";
+  | "email"
+  | "description"
+  | "location"
+  | "gender"
+  | "followers"
+  | "following";
 
 const STATUS: Record<
   StatusKind,
@@ -40,6 +45,11 @@ const LABELS: Record<
   user: { emoji: "🙋", text: "User:", plain: "user:" },
   userId: { emoji: "🪪", text: "User ID:", plain: "user_id:" },
   email: { emoji: "📧", text: "Email:", plain: "email:" },
+  description: { emoji: "📝", text: "Description:", plain: "description:" },
+  location: { emoji: "📍", text: "Location:", plain: "location:" },
+  gender: { emoji: "👤", text: "Gender:", plain: "gender:" },
+  followers: { emoji: "🫂", text: "Followers:", plain: "followers:" },
+  following: { emoji: "➡️", text: "Following:", plain: "following:" },
 };
 
 export function statusPrefix(kind: StatusKind, cfg: OutputConfig): string {

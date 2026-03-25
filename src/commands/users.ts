@@ -234,4 +234,59 @@ export function registerUserCommands(program: Command, ctx: CliContext): void {
     fetch: (client, userId, pageNumber) =>
       client.getFollowing(userId, pageNumber),
   });
+
+  program
+    .command("whoami")
+    .description("Show which Weibo account the current credentials belong to")
+    .action(async () => {
+      const opts = program.opts();
+      const timeoutMs = ctx.resolveTimeoutFromOptions(opts);
+
+      const { cookies, warnings } =
+        await ctx.resolveCredentialsFromOptions(opts);
+
+      for (const warning of warnings) {
+        console.error(`${ctx.p("warn")}${warning}`);
+      }
+
+      if (
+        !cookies.SUB ||
+        !cookies.SUBP ||
+        !cookies.ALF ||
+        !cookies.SCF ||
+        !cookies.WBPSESS ||
+        !cookies.XSRFTOKEN
+      ) {
+        console.error(`${ctx.p("err")}Missing required credentials`);
+        process.exit(1);
+      }
+
+      const client = new WeiboClientUsers({ cookies, timeoutMs });
+      const result = await client.getCurrentUser();
+
+      const credentialSource = cookies.source ?? "auto-detected cookies";
+
+      if (result.success && result.user) {
+        console.log(
+          `${ctx.l("user")}@${result.user.id} (${result.user.screenName})`,
+        );
+        console.log(`${ctx.l("description")}${result.user.description}`);
+        console.log(
+          `${ctx.l("gender")}${result.user.gender === "m" ? "Male" : "Female"}`,
+        );
+        console.log(`${ctx.l("location")}${result.user.location}`);
+        console.log(
+          `${ctx.l("followers")}${result.user.followersCount.toLocaleString()}`,
+        );
+        console.log(
+          `${ctx.l("following")}${result.user.friendsCount.toLocaleString()}`,
+        );
+        console.log(`${ctx.l("credentials")}${credentialSource}`);
+      } else {
+        console.error(
+          `${ctx.p("err")}Failed to determine current user: ${result.error ?? "Unknown error"}`,
+        );
+        process.exit(1);
+      }
+    });
 }
