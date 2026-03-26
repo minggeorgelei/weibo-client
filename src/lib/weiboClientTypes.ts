@@ -33,3 +33,7 @@ export interface GetCurrentUserResult {
   user?: WeiboUser;
   error?: string;
 }
+
+export type FollowUserResult = GetCurrentUserResult;
+
+export type UnfollowUserResult = GetCurrentUserResult;

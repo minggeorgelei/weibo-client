@@ -2,8 +2,14 @@ import { registerUserCommands } from "../commands/users";
 import { Command } from "commander";
 import { CliContext, collectCookieSource } from "../cli/shared";
 import { getCliVersion } from "../lib/version";
+import { registerFollowCommands } from "../commands/follow";
 
-export const KNOWN_COMMANDS = new Set(["followers", "following"]);
+export const KNOWN_COMMANDS = new Set([
+  "followers",
+  "following",
+  "follow",
+  "unfollow",
+]);
 
 const collect = (value: string, resouces: string[] = []): string[] => {
   resouces.push(value);
@@ -106,6 +112,6 @@ export function createProgram(ctx: CliContext): Command {
     .option("--no-color", "Disable ANSI colors (or set NO_COLOR)");
 
   registerUserCommands(program, ctx);
-
+  registerFollowCommands(program, ctx);
   return program;
 }

@@ -11,6 +11,7 @@ import kleur from "kleur";
 import path from "path";
 import { homedir } from "os";
 import { readFileSync, existsSync } from "fs";
+import { WeiboClientBase } from "../lib/weiboClientBase";
 
 const COOKIE_SOURCES: CookieSource[] = [
   "chrome",
@@ -410,4 +411,32 @@ export function createCliContext(
     resolveCredentialsFromOptions,
     loadMedia,
   };
+}
+
+export async function resolveUserId(
+  client: WeiboClientBase,
+  usernameOrId: string,
+  ctx: CliContext,
+): Promise<{ userId: number; screenName?: string } | null> {
+  const rawContent = usernameOrId.trim();
+  if (/^\d+$/.test(rawContent)) {
+    return { userId: Number(rawContent) };
+  }
+
+  const screenName = rawContent.startsWith("@")
+    ? rawContent.slice(1)
+    : rawContent;
+  if (screenName) {
+    const result = await client.getUserByScreenName(screenName);
+    if (result.success) {
+      return { userId: result.user!.id, screenName };
+    } else {
+      console.error(
+        `${ctx.p("err")}Failed to resolve username @${screenName}: ${result.error}`,
+      );
+      return null;
+    }
+  }
+  console.error(`${ctx.p("err")}Invalid username: ${usernameOrId}`);
+  return null;
 }
