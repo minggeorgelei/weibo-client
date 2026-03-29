@@ -3,12 +3,14 @@ import { Command } from "commander";
 import { CliContext, collectCookieSource } from "../cli/shared";
 import { getCliVersion } from "../lib/version";
 import { registerFollowCommands } from "../commands/follow";
+import { registerPostCommands } from "../commands/post";
 
 export const KNOWN_COMMANDS = new Set([
   "followers",
   "following",
   "follow",
   "unfollow",
+  "post",
 ]);
 
 const collect = (value: string, resouces: string[] = []): string[] => {
@@ -113,5 +115,6 @@ export function createProgram(ctx: CliContext): Command {
 
   registerUserCommands(program, ctx);
   registerFollowCommands(program, ctx);
+  registerPostCommands(program, ctx);
   return program;
 }

@@ -77,6 +77,22 @@ export const collectCookieSource = (
   return sources;
 };
 
+export function computeCrc32(buffer: Buffer): number {
+  const table = new Int32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let j = 0; j < 8; j++) {
+      c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    }
+    table[i] = c;
+  }
+  let crc = -1;
+  for (let i = 0; i < buffer.length; i++) {
+    crc = table[(crc ^ buffer[i]) & 0xff] ^ (crc >>> 8);
+  }
+  return (crc ^ -1) >>> 0;
+}
+
 function parseCookieSource(value: string): CookieSource {
   const normalized = value.trim().toLowerCase();
   if (
@@ -393,8 +409,8 @@ export function createCliContext(
     if (videoCount === 1 && specs.length > 1) {
       throw new Error("Video cannot be combined with other media");
     }
-    if (specs.length > 4) {
-      throw new Error("Maximum 4 media attachments");
+    if (specs.length > 18) {
+      throw new Error("Maximum 18 images");
     }
     return specs;
   }

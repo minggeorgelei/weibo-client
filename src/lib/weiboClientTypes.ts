@@ -37,3 +37,44 @@ export interface GetCurrentUserResult {
 export type FollowUserResult = GetCurrentUserResult;
 
 export type UnfollowUserResult = GetCurrentUserResult;
+
+export interface CreatePostResult {
+  success: boolean;
+  error?: string;
+}
+
+export interface UploadImageResult {
+  success: boolean;
+  pid?: string;
+  error?: string;
+}
+
+export interface UploadVideoResult {
+  success: boolean;
+  mediaId?: string;
+  error?: string;
+}
+
+export interface VideoInitResponse {
+  upload_id: string;
+  media_id: string;
+  strategy: {
+    upload_protocol: string;
+    chunk_size: number;
+    threads: number;
+    chunk_retry: number;
+    chunk_delay: number;
+    chunk_timeout: number;
+    url_tag: string;
+  };
+  auth: string;
+  request_id: string;
+}
+
+export interface VideoCheckResponse {
+  result: boolean;
+  upload_id?: string;
+  media_id?: string;
+  auth?: string;
+  request_id?: string;
+}
