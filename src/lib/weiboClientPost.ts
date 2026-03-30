@@ -10,7 +10,7 @@ import {
 import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
-import { computeCrc32 } from "../cli/shared"
+import { computeCrc32 } from "../cli/shared";
 
 export interface IWeiboClientPost {
   createPost(content: string, imagePaths?: string[]): Promise<CreatePostResult>;
@@ -156,8 +156,11 @@ export class WeiboClientPost
       if (!dispatchData.ok) {
         return { success: false, error: "Dispatch returned ok=0" };
       }
-      ({ init_url: initUrl, upload_url: uploadUrl, check_url: checkUrl } =
-        dispatchData.data.video);
+      ({
+        init_url: initUrl,
+        upload_url: uploadUrl,
+        check_url: checkUrl,
+      } = dispatchData.data.video);
     } catch (err) {
       return {
         success: false,
@@ -183,7 +186,12 @@ export class WeiboClientPost
       session_id: fileMd5,
     });
 
-    let initData: { upload_id: string; media_id: string; strategy: { chunk_size: number }; auth: string };
+    let initData: {
+      upload_id: string;
+      media_id: string;
+      strategy: { chunk_size: number };
+      auth: string;
+    };
     try {
       const initResp = await fetch(`${initUrl}?${initParams.toString()}`, {
         method: "POST",
@@ -332,9 +340,13 @@ export class WeiboClientPost
 
     const params = new URLSearchParams(body);
 
-    const response = await this.api.post("/statuses/update", params.toString(), {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    });
+    const response = await this.api.post(
+      "/statuses/update",
+      params.toString(),
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      },
+    );
     const result = response.data as WeiboApiResult;
     if (!result.success) {
       return { success: false, error: result.error };

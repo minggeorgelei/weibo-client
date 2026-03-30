@@ -78,3 +78,29 @@ export interface VideoCheckResponse {
   auth?: string;
   request_id?: string;
 }
+
+export interface ImageInfo {
+  picId: string;
+  url: string;
+  width: number;
+  height: number;
+}
+
+export interface VideoInfo {
+  format: string;
+  streamUrl: string;
+  name: string;
+}
+
+export interface WeiboPostInfo {
+  images?: ImageInfo[];
+  video?: VideoInfo;
+  id: number;
+  repostCount: number;
+  commentCount: number;
+  attitudesCount: number;
+  content: string;
+  region: string;
+  createdAt: string;
+  user: WeiboUser;
+}
