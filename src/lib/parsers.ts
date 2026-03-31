@@ -1,4 +1,4 @@
-import { WeiboUser } from "./weiboClientTypes";
+import { WeiboUser, WeiboPostInfo, WeiboPostInfos } from "./weiboClientTypes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseWeiboUser(rawUser: any): WeiboUser {
@@ -15,4 +15,64 @@ export function parseWeiboUser(rawUser: any): WeiboUser {
     followersCount: rawUser.followers_count,
     friendsCount: rawUser.friends_count,
   };
+}
+
+export function parseWeiboPost(rawPost: any): WeiboPostInfos {
+  const weiboPostInfoList: WeiboPostInfo[] = [];
+  const weiboPostList = rawPost.list;
+  for (const post of weiboPostList) {
+    let weiboPostInfo: WeiboPostInfo = {
+      id: 0,
+      repostCount: 0,
+      commentCount: 0,
+      attitudesCount: 0,
+      content: "",
+      region: "",
+      createdAt: "",
+      user: {
+        id: 0,
+        screenName: "",
+        profileImageUrl: "",
+        commentCount: 0,
+        repostCount: 0,
+        likeCount: 0,
+        description: "",
+        location: "",
+        gender: "",
+        followersCount: 0,
+        friendsCount: 0,
+      },
+    };
+    weiboPostInfo.id = post.id;
+    weiboPostInfo.createdAt = post.created_at;
+    weiboPostInfo.user = parseWeiboUser(post.user);
+    weiboPostInfo.repostCount = post.reposts_count;
+    weiboPostInfo.commentCount = post.comments_count;
+    weiboPostInfo.attitudesCount = post.attitudes_count;
+    weiboPostInfo.content = post.text_raw;
+    weiboPostInfo.region = post.region_name;
+    if (post.pic_ids) {
+      for (const picId of post.pic_ids) {
+        const picInfo = post.pic_infos[picId];
+        const original = picInfo.original;
+        weiboPostInfo.images = [];
+        weiboPostInfo.images.push({
+          url: original.url,
+          width: original.width,
+          height: original.height,
+          picId: picId,
+        });
+      }
+    }
+    if (post.page_info && post.page_info.object_type === "video") {
+      const videoInfo = post.page_info.media_info;
+      weiboPostInfo.video = {
+        format: videoInfo.format,
+        name: videoInfo.name,
+        streamUrl: videoInfo.stream_url,
+      };
+    }
+    weiboPostInfoList.push(weiboPostInfo);
+  }
+  return { posts: weiboPostInfoList };
 }
