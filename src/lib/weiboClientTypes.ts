@@ -104,3 +104,7 @@ export interface WeiboPostInfo {
   createdAt: string;
   user: WeiboUser;
 }
+
+export interface WeiboPostInfos {
+  posts: WeiboPostInfo[];
+}
