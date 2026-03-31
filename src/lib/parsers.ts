@@ -1,4 +1,4 @@
-import { WeiboUser, WeiboPostInfo, WeiboPostInfos } from "./weiboClientTypes";
+import { WeiboUser, WeiboPostInfo } from "./weiboClientTypes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseWeiboUser(rawUser: any): WeiboUser {
@@ -17,7 +17,7 @@ export function parseWeiboUser(rawUser: any): WeiboUser {
   };
 }
 
-export function parseWeiboPost(rawPost: any): WeiboPostInfos {
+export function parseWeiboPost(rawPost: any): WeiboPostInfo[] {
   const weiboPostInfoList: WeiboPostInfo[] = [];
   const weiboPostList = rawPost.list;
   for (const post of weiboPostList) {
@@ -74,5 +74,5 @@ export function parseWeiboPost(rawPost: any): WeiboPostInfos {
     }
     weiboPostInfoList.push(weiboPostInfo);
   }
-  return { posts: weiboPostInfoList };
+  return weiboPostInfoList;
 }
