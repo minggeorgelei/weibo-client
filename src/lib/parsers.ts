@@ -51,11 +51,11 @@ export function parseWeiboPost(rawPost: any): WeiboPostInfo[] {
     weiboPostInfo.attitudesCount = post.attitudes_count;
     weiboPostInfo.content = post.text_raw;
     weiboPostInfo.region = post.region_name;
-    if (post.pic_ids) {
+    if (post.pic_ids && post.pic_ids.length > 0) {
+      weiboPostInfo.images = [];
       for (const picId of post.pic_ids) {
         const picInfo = post.pic_infos[picId];
         const original = picInfo.original;
-        weiboPostInfo.images = [];
         weiboPostInfo.images.push({
           url: original.url,
           width: original.width,

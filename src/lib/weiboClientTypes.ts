@@ -92,6 +92,12 @@ export interface VideoInfo {
   name: string;
 }
 
+export interface GetUserPostsResult {
+  success: boolean;
+  posts?: WeiboPostInfo[];
+  error?: string;
+}
+
 export interface WeiboPostInfo {
   images?: ImageInfo[];
   video?: VideoInfo;

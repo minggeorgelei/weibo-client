@@ -4,6 +4,7 @@ import { CliContext, collectCookieSource } from "../cli/shared";
 import { getCliVersion } from "../lib/version";
 import { registerFollowCommands } from "../commands/follow";
 import { registerPostCommands } from "../commands/post";
+import { registerReadCommands } from "../commands/read";
 
 export const KNOWN_COMMANDS = new Set([
   "followers",
@@ -11,6 +12,7 @@ export const KNOWN_COMMANDS = new Set([
   "follow",
   "unfollow",
   "post",
+  "read",
 ]);
 
 const collect = (value: string, resouces: string[] = []): string[] => {
@@ -116,5 +118,6 @@ export function createProgram(ctx: CliContext): Command {
   registerUserCommands(program, ctx);
   registerFollowCommands(program, ctx);
   registerPostCommands(program, ctx);
+  registerReadCommands(program, ctx);
   return program;
 }
