@@ -4,6 +4,7 @@ import {
   WeiboClientOptions,
   CreatePostResult,
   CreateCommentResult,
+  SetLikeResult,
   UploadImageResult,
   UploadVideoResult,
   VideoCheckResponse,
@@ -347,6 +348,20 @@ export class WeiboClientPost
       {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       },
+    );
+    const result = response.data as WeiboApiResult;
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+    return { success: true };
+  }
+
+  async setLike(id: string): Promise<SetLikeResult> {
+    const params = new URLSearchParams({ id });
+    const response = await this.api.post(
+      "/statuses/setLike",
+      params.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } },
     );
     const result = response.data as WeiboApiResult;
     if (!result.success) {

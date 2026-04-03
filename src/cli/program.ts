@@ -13,6 +13,7 @@ export const KNOWN_COMMANDS = new Set([
   "unfollow",
   "post",
   "comment",
+  "like",
   "read",
 ]);
 

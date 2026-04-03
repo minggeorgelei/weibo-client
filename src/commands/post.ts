@@ -77,6 +77,43 @@ export function registerPostCommands(program: Command, ctx: CliContext): void {
     );
 
   program
+    .command("like")
+    .description("Like a weibo post")
+    .argument("<id>", "ID of the weibo post to like")
+    .action(async (id: string) => {
+      const opts = program.opts();
+      const timeoutMs = ctx.resolveTimeoutFromOptions(opts);
+
+      const { cookies, warnings } =
+        await ctx.resolveCredentialsFromOptions(opts);
+
+      for (const warning of warnings) {
+        console.error(`${ctx.p("warn")}${warning}`);
+      }
+
+      if (
+        !cookies.SUB ||
+        !cookies.SUBP ||
+        !cookies.ALF ||
+        !cookies.SCF ||
+        !cookies.WBPSESS ||
+        !cookies.XSRFTOKEN
+      ) {
+        console.error(`${ctx.p("err")}Missing required credentials`);
+        process.exit(1);
+      }
+
+      const client = new WeiboClientPost({ cookies, timeoutMs });
+      const result = await client.setLike(id);
+      if (result.success) {
+        console.log(`${ctx.p("ok")}Post liked`);
+      } else {
+        console.error(`${ctx.p("err")}Failed to like: ${result.error}`);
+        process.exit(1);
+      }
+    });
+
+  program
     .command("post")
     .description("Post a new weibo")
     .argument("<content>", "Text content of the post")

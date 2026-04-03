@@ -48,6 +48,11 @@ export interface CreateCommentResult {
   error?: string;
 }
 
+export interface SetLikeResult {
+  success: boolean;
+  error?: string;
+}
+
 export interface UploadImageResult {
   success: boolean;
   pid?: string;
