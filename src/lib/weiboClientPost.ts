@@ -3,6 +3,7 @@ import { WeiboApiResult } from "./axiosInstance";
 import {
   WeiboClientOptions,
   CreatePostResult,
+  CreateCommentResult,
   UploadImageResult,
   UploadVideoResult,
   VideoCheckResponse,
@@ -342,6 +343,40 @@ export class WeiboClientPost
 
     const response = await this.api.post(
       "/statuses/update",
+      params.toString(),
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      },
+    );
+    const result = response.data as WeiboApiResult;
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+    return { success: true };
+  }
+
+  async createComment(
+    id: string,
+    comment: string,
+    options?: {
+      picId?: string;
+      isRepost?: boolean;
+      commentOriginal?: boolean;
+    },
+  ): Promise<CreateCommentResult> {
+    const body: Record<string, string> = {
+      id,
+      comment,
+      pic_id: options?.picId ?? "",
+      is_repost: options?.isRepost ? "1" : "0",
+      comment_ori: options?.commentOriginal ? "1" : "0",
+      is_comment: "0",
+    };
+
+    const params = new URLSearchParams(body);
+
+    const response = await this.api.post(
+      "/comments/create",
       params.toString(),
       {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },

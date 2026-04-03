@@ -43,6 +43,11 @@ export interface CreatePostResult {
   error?: string;
 }
 
+export interface CreateCommentResult {
+  success: boolean;
+  error?: string;
+}
+
 export interface UploadImageResult {
   success: boolean;
   pid?: string;

@@ -4,6 +4,79 @@ import { CliContext } from "../cli/shared";
 
 export function registerPostCommands(program: Command, ctx: CliContext): void {
   program
+    .command("comment")
+    .description("Comment on a weibo post")
+    .argument("<id>", "ID of the weibo post to comment on")
+    .argument("<content>", "Comment text")
+    .option("-m, --media <path>", "Image to attach to the comment")
+    .option("--repost", "Also repost the weibo")
+    .option(
+      "--comment-original",
+      "Also comment on the original weibo (for reposts)",
+    )
+    .action(
+      async (
+        id: string,
+        content: string,
+        options: {
+          media?: string;
+          repost?: boolean;
+          commentOriginal?: boolean;
+        },
+      ) => {
+        const opts = program.opts();
+        const timeoutMs = ctx.resolveTimeoutFromOptions(opts);
+
+        const { cookies, warnings } =
+          await ctx.resolveCredentialsFromOptions(opts);
+
+        for (const warning of warnings) {
+          console.error(`${ctx.p("warn")}${warning}`);
+        }
+
+        if (
+          !cookies.SUB ||
+          !cookies.SUBP ||
+          !cookies.ALF ||
+          !cookies.SCF ||
+          !cookies.WBPSESS ||
+          !cookies.XSRFTOKEN
+        ) {
+          console.error(`${ctx.p("err")}Missing required credentials`);
+          process.exit(1);
+        }
+
+        const client = new WeiboClientPost({ cookies, timeoutMs });
+
+        let picId: string | undefined;
+        if (options.media) {
+          console.error(`${ctx.p("info")}Uploading image ${options.media}...`);
+          const uploadResult = await client.uploadImage(options.media);
+          if (!uploadResult.success) {
+            console.error(
+              `${ctx.p("err")}Failed to upload image: ${uploadResult.error}`,
+            );
+            process.exit(1);
+          }
+          picId = uploadResult.pid;
+          console.error(`${ctx.p("ok")}Image uploaded`);
+        }
+
+        const result = await client.createComment(id, content, {
+          picId,
+          isRepost: options.repost,
+          commentOriginal: options.commentOriginal,
+        });
+        if (result.success) {
+          console.log(`${ctx.p("ok")}Comment posted`);
+        } else {
+          console.error(`${ctx.p("err")}Failed to comment: ${result.error}`);
+          process.exit(1);
+        }
+      },
+    );
+
+  program
     .command("post")
     .description("Post a new weibo")
     .argument("<content>", "Text content of the post")
