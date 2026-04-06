@@ -1,5 +1,6 @@
 import { WeiboClientBase } from "./weiboClientBase";
 import { WeiboApiResult } from "./axiosInstance";
+import { parseCreateWeiboPost } from "./parsers";
 import {
   WeiboClientOptions,
   CreatePostResult,
@@ -16,6 +17,28 @@ import { computeCrc32 } from "../cli/shared";
 
 export interface IWeiboClientPost {
   createPost(content: string, imagePaths?: string[]): Promise<CreatePostResult>;
+  setLike(id: string): Promise<SetLikeResult>;
+  createComment(
+    id: string,
+    comment: string,
+    options?: {
+      picId?: string;
+      isRepost?: boolean;
+      commentOriginal?: boolean;
+    },
+  ): Promise<CreateCommentResult>;
+  replyComment(
+    id: string,
+    cid: string,
+    comment: string,
+    options?: {
+      picId?: string;
+      isRepost?: boolean;
+      commentOriginal?: boolean;
+    },
+  ): Promise<CreateCommentResult>;
+  uploadImage(imagePath: string): Promise<UploadImageResult>;
+  uploadVideo(videoPath: string): Promise<UploadVideoResult>;
 }
 
 export class WeiboClientPost
@@ -353,7 +376,11 @@ export class WeiboClientPost
     if (!result.success) {
       return { success: false, error: result.error };
     }
-    return { success: true };
+    if (videoMediaId) {
+      return { success: true };
+    }
+    const post = parseCreateWeiboPost(result.data.data);
+    return { success: true, post };
   }
 
   async setLike(id: string): Promise<SetLikeResult> {
@@ -384,7 +411,7 @@ export class WeiboClientPost
       comment,
       pic_id: options?.picId ?? "",
       is_repost: options?.isRepost ? "1" : "0",
-      comment_ori: options?.commentOriginal ? "1" : "0",
+      comment_ori: "0",
       is_comment: "0",
     };
 
@@ -397,6 +424,38 @@ export class WeiboClientPost
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       },
     );
+    const result = response.data as WeiboApiResult;
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+    return { success: true };
+  }
+
+  async replyComment(
+    id: string,
+    cid: string,
+    comment: string,
+    options?: {
+      picId?: string;
+      isRepost?: boolean;
+      commentOriginal?: boolean;
+    },
+  ): Promise<CreateCommentResult> {
+    const body: Record<string, string> = {
+      id,
+      cid,
+      comment,
+      pic_id: options?.picId ?? "",
+      is_repost: options?.isRepost ? "1" : "0",
+      comment_ori: "0",
+      is_comment: "0",
+    };
+
+    const params = new URLSearchParams(body);
+
+    const response = await this.api.post("/comments/reply", params.toString(), {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
     const result = response.data as WeiboApiResult;
     if (!result.success) {
       return { success: false, error: result.error };

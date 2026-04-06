@@ -76,3 +76,42 @@ export function parseWeiboPost(rawPost: any): WeiboPostInfo[] {
   }
   return weiboPostInfoList;
 }
+
+export function parseCreateWeiboPost(rawCreateWeiboPost: any) {
+  let weiboPostInfo: WeiboPostInfo = {
+    id: 0,
+    content: "",
+    createdAt: "",
+    user: {
+      id: 0,
+      screenName: "",
+      profileImageUrl: "",
+      commentCount: 0,
+      repostCount: 0,
+      likeCount: 0,
+      description: "",
+      location: "",
+      gender: "",
+      followersCount: 0,
+      friendsCount: 0,
+    },
+  };
+  weiboPostInfo.id = rawCreateWeiboPost.id;
+  weiboPostInfo.createdAt = rawCreateWeiboPost.created_at;
+  weiboPostInfo.user = parseWeiboUser(rawCreateWeiboPost.user);
+  weiboPostInfo.content = rawCreateWeiboPost.text_raw;
+  if (rawCreateWeiboPost.pic_ids && rawCreateWeiboPost.pic_ids.length > 0) {
+    weiboPostInfo.images = [];
+    for (const picId of rawCreateWeiboPost.pic_ids) {
+      const picInfo = rawCreateWeiboPost.pic_infos[picId];
+      const original = picInfo.original;
+      weiboPostInfo.images.push({
+        url: original.url,
+        width: original.width,
+        height: original.height,
+        picId: picId,
+      });
+    }
+  }
+  return weiboPostInfo;
+}

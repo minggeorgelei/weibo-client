@@ -40,6 +40,7 @@ export type UnfollowUserResult = GetCurrentUserResult;
 
 export interface CreatePostResult {
   success: boolean;
+  post?: WeiboPostInfo;
   error?: string;
 }
 
@@ -112,11 +113,11 @@ export interface WeiboPostInfo {
   images?: ImageInfo[];
   video?: VideoInfo;
   id: number;
-  repostCount: number;
-  commentCount: number;
-  attitudesCount: number;
+  repostCount?: number;
+  commentCount?: number;
+  attitudesCount?: number;
   content: string;
-  region: string;
+  region?: string;
   createdAt: string;
   user: WeiboUser;
 }
