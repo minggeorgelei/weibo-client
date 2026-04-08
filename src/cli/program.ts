@@ -16,6 +16,7 @@ export const KNOWN_COMMANDS = new Set([
   "reply",
   "like",
   "read",
+  "comments",
 ]);
 
 const collect = (value: string, resouces: string[] = []): string[] => {

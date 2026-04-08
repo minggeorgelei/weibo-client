@@ -1,4 +1,4 @@
-import { WeiboUser, WeiboPostInfo } from "./weiboClientTypes";
+import { WeiboUser, WeiboPostInfo, WeiboCommentInfo } from "./weiboClientTypes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseWeiboUser(rawUser: any): WeiboUser {
@@ -75,6 +75,24 @@ export function parseWeiboPost(rawPost: any): WeiboPostInfo[] {
     weiboPostInfoList.push(weiboPostInfo);
   }
   return weiboPostInfoList;
+}
+
+export function parseWeiboComment(rawComment: any): WeiboCommentInfo {
+  const comment: WeiboCommentInfo = {
+    id: rawComment.id,
+    rootId: rawComment.rootid,
+    content: rawComment.text_raw,
+    createdAt: rawComment.created_at,
+    likeCount: rawComment.like_counts ?? 0,
+    totalReplyCount: rawComment.total_number ?? 0,
+    user: parseWeiboUser(rawComment.user),
+  };
+  if (rawComment.comments && rawComment.comments.length > 0) {
+    comment.comments = rawComment.comments.map((c: any) =>
+      parseWeiboComment(c),
+    );
+  }
+  return comment;
 }
 
 export function parseCreateWeiboPost(rawCreateWeiboPost: any) {

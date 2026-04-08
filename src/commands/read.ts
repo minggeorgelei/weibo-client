@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { CliContext, resolveUserId } from "../cli/shared";
 import { WeiboClientUserWeibo } from "../lib/weiboClientUserWeibo";
-import { WeiboPostInfo } from "../lib/weiboClientTypes";
+import { WeiboPostInfo, WeiboCommentInfo } from "../lib/weiboClientTypes";
 
 type ReadCommandOpts = {
   screenName?: string;
@@ -37,6 +37,44 @@ function printPost(post: WeiboPostInfo, ctx: CliContext): void {
     console.log(`  [video] ${post.video.name}  ${post.video.streamUrl}`);
   }
   console.log("──────────────────────────────────────────────────");
+}
+
+type CommentsCommandOpts = {
+  sort?: string;
+  limit?: string;
+  maxChildren?: string;
+  noChildren?: boolean;
+  json?: boolean;
+};
+
+function printComment(
+  comment: WeiboCommentInfo,
+  ctx: CliContext,
+  indent: number = 0,
+): void {
+  const output = ctx.getOutput();
+  const pad = "  ".repeat(indent);
+  console.log(
+    `${pad}[${comment.id}] @${comment.user.screenName}  ·  ${comment.createdAt}`,
+  );
+  console.log(`${pad}${comment.content}`);
+  if (output.emoji) {
+    console.log(
+      `${pad}❤️  ${comment.likeCount}  💬 ${comment.totalReplyCount}`,
+    );
+  } else {
+    console.log(
+      `${pad}likes: ${comment.likeCount}  replies: ${comment.totalReplyCount}`,
+    );
+  }
+  if (comment.comments && comment.comments.length > 0) {
+    for (const child of comment.comments) {
+      printComment(child, ctx, indent + 1);
+    }
+  }
+  if (indent === 0) {
+    console.log("──────────────────────────────────────────────────");
+  }
 }
 
 export function registerReadCommands(program: Command, ctx: CliContext): void {
@@ -200,6 +238,110 @@ export function registerReadCommands(program: Command, ctx: CliContext): void {
       } else {
         console.error(`${ctx.p("info")}Total: ${finalPosts.length} posts`);
         for (const post of finalPosts) printPost(post, ctx);
+      }
+    });
+
+  program
+    .command("comments <postId>")
+    .description("Read comments for a weibo post")
+    .option("--sort <number>", "Sort order: 0=hot, 1=time (default: 0)", "0")
+    .option("--limit <number>", "Maximum number of parent comments to fetch")
+    .option(
+      "--max-children <number>",
+      "Maximum number of child comments per parent (default: first page)",
+    )
+    .option("--no-children", "Skip fetching child comments entirely")
+    .option("--json", "Output as JSON")
+    .action(async (postId: string, cmdOpts: CommentsCommandOpts) => {
+      const opts = program.opts();
+      const timeoutMs = ctx.resolveTimeoutFromOptions(opts);
+
+      const flow = cmdOpts.sort ? parseInt(cmdOpts.sort) : 0;
+      if (isNaN(flow) || (flow !== 0 && flow !== 1)) {
+        console.error(
+          `${ctx.p("err")}Invalid --sort. Expects 0 (hot) or 1 (time)`,
+        );
+        process.exit(1);
+      }
+
+      const limit = cmdOpts.limit ? parseInt(cmdOpts.limit) : undefined;
+      if (limit !== undefined && (isNaN(limit) || limit <= 0)) {
+        console.error(
+          `${ctx.p("err")}Invalid --limit. Expects a number greater than 0`,
+        );
+        process.exit(1);
+      }
+
+      const maxChildren = cmdOpts.maxChildren
+        ? parseInt(cmdOpts.maxChildren)
+        : undefined;
+      if (
+        maxChildren !== undefined &&
+        (isNaN(maxChildren) || maxChildren <= 0)
+      ) {
+        console.error(
+          `${ctx.p("err")}Invalid --max-children. Expects a number greater than 0`,
+        );
+        process.exit(1);
+      }
+
+      const { cookies, warnings } =
+        await ctx.resolveCredentialsFromOptions(opts);
+      for (const warning of warnings) {
+        console.error(`${ctx.p("warn")}${warning}`);
+      }
+
+      if (
+        !cookies.SUB ||
+        !cookies.SUBP ||
+        !cookies.ALF ||
+        !cookies.SCF ||
+        !cookies.WBPSESS ||
+        !cookies.XSRFTOKEN
+      ) {
+        console.error(`${ctx.p("err")}Missing required credentials`);
+        process.exit(1);
+      }
+
+      const client = new WeiboClientUserWeibo({ cookies, timeoutMs });
+
+      // --no-children => maxChildComments=0, --max-children N => N, default => undefined (first page)
+      const maxChildComments = cmdOpts.noChildren === true ? 0 : maxChildren;
+
+      if (!cmdOpts.json) {
+        const childrenDesc =
+          maxChildComments === 0
+            ? "none"
+            : maxChildComments !== undefined
+              ? `max ${maxChildComments}`
+              : "first page";
+        console.error(
+          `${ctx.p("info")}Fetching comments for post ${postId} (sort: ${flow === 0 ? "hot" : "time"}, children: ${childrenDesc}${limit ? `, limit: ${limit}` : ""})`,
+        );
+      }
+
+      const result = await client.getUserComments(postId, {
+        flow,
+        maxComments: limit,
+        maxChildComments,
+      });
+
+      if (!result.success) {
+        console.error(`${ctx.p("err")}Failed to get comments: ${result.error}`);
+        process.exit(1);
+      }
+
+      const comments = result.comments!;
+
+      if (cmdOpts.json) {
+        console.log(JSON.stringify({ comments }, null, 2));
+      } else {
+        if (comments.length === 0) {
+          console.error(`${ctx.p("info")}No comments found`);
+        } else {
+          console.error(`${ctx.p("info")}Total: ${comments.length} comments`);
+          for (const comment of comments) printComment(comment, ctx);
+        }
       }
     });
 }

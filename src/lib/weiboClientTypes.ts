@@ -103,6 +103,23 @@ export interface VideoInfo {
   name: string;
 }
 
+export interface WeiboCommentInfo {
+  id: number;
+  rootId: number;
+  content: string;
+  createdAt: string;
+  likeCount: number;
+  totalReplyCount: number;
+  user: WeiboUser;
+  comments?: WeiboCommentInfo[];
+}
+
+export interface GetUserCommentsResult {
+  success: boolean;
+  comments?: WeiboCommentInfo[];
+  error?: string;
+}
+
 export interface GetUserPostsResult {
   success: boolean;
   posts?: WeiboPostInfo[];
