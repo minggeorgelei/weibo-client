@@ -35,7 +35,7 @@ export function registerDownloadCommands(
   program
     .command("download <url>")
     .description("Download a media file (image or video) from a URL")
-    .option("-o, --output <path>", "Output file path")
+    .option("-o, --output-path <path>", "Output file path")
     .option(
       "--no-resume",
       "Disable HTTP Range resume and always download from scratch",
