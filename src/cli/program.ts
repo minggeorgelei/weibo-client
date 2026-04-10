@@ -5,6 +5,7 @@ import { getCliVersion } from "../lib/version";
 import { registerFollowCommands } from "../commands/follow";
 import { registerPostCommands } from "../commands/post";
 import { registerReadCommands } from "../commands/read";
+import { registerDownloadCommands } from "../commands/download";
 
 export const KNOWN_COMMANDS = new Set([
   "followers",
@@ -17,6 +18,7 @@ export const KNOWN_COMMANDS = new Set([
   "like",
   "read",
   "comments",
+  "download",
 ]);
 
 const collect = (value: string, resouces: string[] = []): string[] => {
@@ -123,5 +125,6 @@ export function createProgram(ctx: CliContext): Command {
   registerFollowCommands(program, ctx);
   registerPostCommands(program, ctx);
   registerReadCommands(program, ctx);
+  registerDownloadCommands(program, ctx);
   return program;
 }
