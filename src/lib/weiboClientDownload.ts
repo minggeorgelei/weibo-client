@@ -116,9 +116,7 @@ export class WeiboClientDownload extends WeiboClientBase {
         clearIdleTimer();
         idleTimer = setTimeout(() => {
           response.data.destroy(
-            new Error(
-              `Idle timeout: no data received for ${idleTimeoutMs}ms`,
-            ),
+            new Error(`Idle timeout: no data received for ${idleTimeoutMs}ms`),
           );
         }, idleTimeoutMs);
       };
