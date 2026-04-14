@@ -8,10 +8,10 @@ export function registerFollowCommands(
 ): void {
   program
     .command("follow")
-    .description("Follow a user")
+    .description("Follow a user by screen name or user ID")
     .argument(
       "<username-or-id>",
-      "Username (with or without @) or user ID to follow",
+      "Screen name (with or without @) or numeric user ID",
     )
     .action(async (usernameOrId: string) => {
       const opts = program.opts();
@@ -62,10 +62,10 @@ export function registerFollowCommands(
 
   program
     .command("unfollow")
-    .description("Unfollow a user")
+    .description("Unfollow a user by screen name or user ID")
     .argument(
       "<username-or-id>",
-      "Username (with or without @) or user ID to unfollow",
+      "Screen name (with or without @) or numeric user ID",
     )
     .action(async (usernameOrId: string) => {
       const opts = program.opts();

@@ -223,21 +223,23 @@ export function registerUserCommands(program: Command, ctx: CliContext): void {
 
   registerUserListCommand({
     name: "followers",
-    description: "List followers of a user",
+    description:
+      "List followers of a user (defaults to current user, use --screen-name to specify)",
     fetch: (client, userId, pageNumber) =>
       client.getFollowers(userId, pageNumber),
   });
 
   registerUserListCommand({
     name: "following",
-    description: "List users followed by a user",
+    description:
+      "List users followed by a user (defaults to current user, use --screen-name to specify)",
     fetch: (client, userId, pageNumber) =>
       client.getFollowing(userId, pageNumber),
   });
 
   program
     .command("whoami")
-    .description("Show which Weibo account the current credentials belong to")
+    .description("Show current logged-in Weibo account info")
     .action(async () => {
       const opts = program.opts();
       const timeoutMs = ctx.resolveTimeoutFromOptions(opts);

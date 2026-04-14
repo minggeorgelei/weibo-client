@@ -80,7 +80,7 @@ function printComment(
 export function registerReadCommands(program: Command, ctx: CliContext): void {
   program
     .command("read")
-    .description("Read posts from a user's weibo timeline")
+    .description("Read posts from a user's timeline (defaults to current user)")
     .option(
       "--screen-name <name>",
       "Screen name or user ID to read posts for (defaults to current user)",
@@ -243,7 +243,7 @@ export function registerReadCommands(program: Command, ctx: CliContext): void {
 
   program
     .command("comments <postId>")
-    .description("Read comments for a weibo post")
+    .description("Read comments for a post (supports sorting, child comments)")
     .option("--sort <number>", "Sort order: 0=hot, 1=time (default: 0)", "0")
     .option("--limit <number>", "Maximum number of parent comments to fetch")
     .option(

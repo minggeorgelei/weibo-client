@@ -5,11 +5,13 @@ import { CliContext } from "../cli/shared";
 export function registerPostCommands(program: Command, ctx: CliContext): void {
   program
     .command("comment")
-    .description("Comment on a weibo post")
-    .argument("<id>", "ID of the weibo post to comment on")
+    .description(
+      "Comment on a weibo post (supports image attachment and repost)",
+    )
+    .argument("<id>", "Post ID to comment on")
     .argument("<content>", "Comment text")
-    .option("-m, --media <path>", "Image to attach to the comment")
-    .option("--repost", "Also repost the weibo")
+    .option("-m, --media <path>", "Attach an image to the comment")
+    .option("--repost", "Also repost the original post")
     .action(
       async (
         id: string,
@@ -72,12 +74,12 @@ export function registerPostCommands(program: Command, ctx: CliContext): void {
 
   program
     .command("reply")
-    .description("Reply to a comment on a weibo post")
-    .argument("<id>", "ID of the weibo post")
-    .argument("<cid>", "ID of the comment to reply to")
+    .description("Reply to a comment (supports image attachment and repost)")
+    .argument("<id>", "Post ID the comment belongs to")
+    .argument("<cid>", "Comment ID to reply to")
     .argument("<content>", "Reply text")
-    .option("-m, --media <path>", "Image to attach to the reply")
-    .option("--repost", "Also repost the weibo")
+    .option("-m, --media <path>", "Attach an image to the reply")
+    .option("--repost", "Also repost the original post")
     .action(
       async (
         id: string,
@@ -141,8 +143,8 @@ export function registerPostCommands(program: Command, ctx: CliContext): void {
 
   program
     .command("like")
-    .description("Like a weibo post")
-    .argument("<id>", "ID of the weibo post to like")
+    .description("Like a weibo post by ID")
+    .argument("<id>", "Post ID to like")
     .action(async (id: string) => {
       const opts = program.opts();
       const timeoutMs = ctx.resolveTimeoutFromOptions(opts);
@@ -178,7 +180,7 @@ export function registerPostCommands(program: Command, ctx: CliContext): void {
 
   program
     .command("post")
-    .description("Post a new weibo")
+    .description("Publish a new weibo post (supports images and video via -m)")
     .argument("<content>", "Text content of the post")
     .option(
       "-m, --media <path>",

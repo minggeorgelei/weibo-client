@@ -32,96 +32,105 @@ export function createProgram(ctx: CliContext): Command {
   const program: Command = new Command();
 
   program
-    .name("weiboclient")
-    .description("Post weibos and replies via WEIBO Client API")
+    .name("weibo")
+    .description(
+      "Weibo CLI — read, post, search, comment, follow, and download from Weibo",
+    )
     .version(getCliVersion());
 
+  // Authentication: manual cookie options
   program
-    .option("--SUB <token>", "Weibo SUB cookie")
-    .option("--SUBP <token>", "Weibo SUBP cookie")
-    .option("--WBPSESS <token>", "Weibo WBPSESS cookie")
-    .option("--ALF <timestamp>", "Weibo ALF cookie")
-    .option("--SCF <token>", "Weibo SCF cookie")
-    .option("--XSRFTOKEN <token>", "Weibo XSRFTOKEN cookie")
+    .option("--SUB <token>", "SUB cookie value")
+    .option("--SUBP <token>", "SUBP cookie value")
+    .option("--WBPSESS <token>", "WBPSESS cookie value")
+    .option("--ALF <timestamp>", "ALF cookie value")
+    .option("--SCF <token>", "SCF cookie value")
+    .option("--XSRFTOKEN <token>", "XSRF-TOKEN cookie value");
+
+  // Authentication: auto-extract cookies from browser profiles
+  program
     .option(
       "--chrome-profile <name>",
-      "Chrome profile name for cookie extraction",
+      "Chrome profile name to extract cookies from",
       ctx.config.chromeProfile,
     )
     .option(
       "--chrome-profile-dir <path>",
-      "Chrome profile directory or cookie DB path for cookie extraction",
+      "Chrome profile directory or cookie DB path",
       ctx.config.chromeProfileDir,
     )
     .option(
       "--edge-profile <name>",
-      "Edge profile name for cookie extraction",
+      "Edge profile name to extract cookies from",
       ctx.config.edgeProfile,
     )
     .option(
       "--edge-profile-dir <path>",
-      "Edge profile directory or cookie DB path for cookie extraction",
+      "Edge profile directory or cookie DB path",
       ctx.config.edgeProfileDir,
     )
     .option(
       "--firefox-profile <name>",
-      "Firefox profile name for cookie extraction",
+      "Firefox profile name to extract cookies from",
       ctx.config.firefoxProfile,
     )
     .option(
       "--firefox-profile-dir <path>",
-      "Firefox profile directory or cookie DB path for cookie extraction",
+      "Firefox profile directory or cookie DB path",
       ctx.config.firefoxProfileDir,
     )
     .option(
       "--opera-profile <name>",
-      "Opera profile name for cookie extraction",
+      "Opera profile name to extract cookies from",
       ctx.config.operaProfile,
     )
     .option(
       "--opera-profile-dir <path>",
-      "Opera profile directory or cookie DB path for cookie extraction",
+      "Opera profile directory or cookie DB path",
       ctx.config.operaProfileDir,
     )
     .option(
       "--brave-profile <name>",
-      "Brave profile name for cookie extraction",
+      "Brave profile name to extract cookies from",
       ctx.config.braveProfile,
     )
     .option(
       "--brave-profile-dir <path>",
-      "Brave profile directory or cookie DB path for cookie extraction",
+      "Brave profile directory or cookie DB path",
       ctx.config.braveProfileDir,
     )
     .option(
       "--vivaldi-profile <name>",
-      "Vivaldi profile name for cookie extraction",
+      "Vivaldi profile name to extract cookies from",
       ctx.config.vivaldiProfile,
     )
     .option(
       "--vivaldi-profile-dir <path>",
-      "Vivaldi profile directory or cookie DB path for cookie extraction",
+      "Vivaldi profile directory or cookie DB path",
       ctx.config.vivaldiProfileDir,
     )
     .option(
       "--cookie-source <source>",
-      "Cookie source for browser cookie extraction (repeatable)",
+      "Browser to extract cookies from, e.g. chrome, edge (repeatable)",
       collectCookieSource,
-    )
+    );
+
+  // Global output & request options
+  program
     .option(
       "--media <path>",
-      "Attach media file (repeatable, up to 5 images or 1 video)",
+      "Attach media file (repeatable, up to 18 images or 1 video)",
       collect,
     )
     .option(
       "--alt <text>",
-      "Alt text for the corresponding --media (repeatable)",
+      "Alt text for the corresponding --media (repeatable, matches order)",
       collect,
     )
     .option("--timeout <ms>", "Request timeout in milliseconds")
-    .option("--plain", "Plain output (stable, no emoji, no color)")
-    .option("--no-emoji", "Disable emoji output")
-    .option("--no-color", "Disable ANSI colors (or set NO_COLOR)");
+    .option("--plain", "Plain output (no emoji, no color)")
+    .option("--no-emoji", "Disable emoji in output")
+    .option("--no-color", "Disable ANSI colors (or set NO_COLOR env)");
 
   registerUserCommands(program, ctx);
   registerFollowCommands(program, ctx);

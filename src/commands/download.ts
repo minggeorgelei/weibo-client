@@ -34,7 +34,7 @@ export function registerDownloadCommands(
 ): void {
   program
     .command("download <url>")
-    .description("Download a media file (image or video) from a URL")
+    .description("Download media from a URL (supports resume and idle timeout)")
     .option("-o, --output-path <path>", "Output file path")
     .option(
       "--no-resume",

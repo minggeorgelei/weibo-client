@@ -4,18 +4,25 @@
   "description": "",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "weibo": "dist/cli.cjs"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "pnpm run build:dist && pnpm run build:binary",
-    "build:dist": "tsc",
+    "build:dist": "tsc --noEmit && esbuild src/cli.ts --bundle --platform=node --format=cjs --outfile=dist/cli.cjs --banner:js=\"#!/usr/bin/env node\" --external:lz4 --external:better-sqlite3",
     "build:binary": "WEIBOCLIENT_VERSION=$(node -p \"require('./package.json').version\") WEIBOCLIENT_GIT_SHA=$(git rev-parse --short=8 HEAD 2>/dev/null || true) bun build --compile --minify --env=WEIBOCLIENT_* src/cli.ts --outfile weibo",
     "dev": "tsx src/cli.ts",
-    "weibo": "pnpm run build:dist && node dist/cli.js"
+    "weibo": "pnpm run build:dist && node dist/cli.cjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^25.3.3",
+    "esbuild": "^0.28.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },

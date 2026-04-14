@@ -41,7 +41,9 @@ export function registerSearchCommands(
 ): void {
   program
     .command("search <query>")
-    .description("Search weibo posts by keyword")
+    .description(
+      "Search weibo posts by keyword (supports pagination via --limit)",
+    )
     .option(
       "--limit <number>",
       "Maximum number of posts to fetch (paginates automatically)",
