@@ -279,4 +279,4 @@ pnpm run build:binary
 
 ## License
 
-ISC
+MIT
